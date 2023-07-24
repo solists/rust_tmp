@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rusttmp-deployment
+  namespace: rusttmp
+spec:
+  selector:
+    matchLabels:
+      app: rusttmp
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rusttmp
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8084"
+    spec:
+      containers:
+        - name: rusttmp
+          image: docker.io/solists/rusttmp:${IMAGE_TAG}
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-configuration
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-configuration
+                  key: POSTGRES_USER
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-configuration
+                  key: POSTGRES_DB
+          ports:
+            - containerPort: 8080
+            - containerPort: 8084
+            - containerPort: 8082
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
